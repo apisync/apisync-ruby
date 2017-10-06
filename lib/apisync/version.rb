@@ -1,3 +1,3 @@
-module Apisync
-  VERSION = "0.1.0"
+class Apisync
+  VERSION = "0.0.1"
 end
