@@ -16,7 +16,7 @@ RSpec.describe Apisync do
       it "uses an abstract resource" do
         expect(Apisync::Resource)
           .to receive(:new)
-          .with(:users, {authorization: :api_key})
+          .with(:users, {api_key: :api_key})
           .and_return(resource)
 
         expect(subject.users).to eq resource
@@ -27,10 +27,10 @@ RSpec.describe Apisync do
       it 'passes it along to the resource' do
         expect(Apisync::Resource)
           .to receive(:new)
-          .with(:users, { host: 'http://users', authorization: api_key })
+          .with(:users, { host: 'http://users', api_key: api_key })
           .and_return(resource)
 
-        subject.users(host: 'http://users', authorization: '123')
+        subject.users(host: 'http://users', api_key: '123')
       end
     end
   end
@@ -48,7 +48,7 @@ RSpec.describe Apisync do
         it 'uses instance_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { authorization: :instance_key })
+            .with(:users, { api_key: :instance_key })
 
           subject.users
         end
@@ -60,7 +60,7 @@ RSpec.describe Apisync do
         it 'uses global_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { authorization: :global_key })
+            .with(:users, { api_key: :global_key })
 
           subject.users
         end
@@ -74,7 +74,7 @@ RSpec.describe Apisync do
         it 'uses instance_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { authorization: :instance_key })
+            .with(:users, { api_key: :instance_key })
 
           subject.users
         end

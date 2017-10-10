@@ -19,7 +19,7 @@ class Apisync
 
   def method_missing(name, args = {}, &block)
     # overrides the instance api_key as `authorization`
-    options = args.merge(authorization: @api_key)
+    options = args.merge(api_key: @api_key)
     Apisync::Resource.new(name, options)
   end
 
