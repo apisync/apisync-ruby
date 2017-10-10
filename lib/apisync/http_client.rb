@@ -7,16 +7,20 @@ class Apisync
       "Accept"       => "application/vnd.api+json"
     }.freeze
 
-    def self.post(resource_name:, data:, api_key: nil, options: {})
+    def self.post(resource_name:, data:, options: {})
       url = Apisync::Http::Url.new(
         resource_name: resource_name,
         options: options
       )
       payload = payload_from_data(data)
-      HTTParty.post(url.to_s, body: {data: payload}.to_json, headers: header(api_key: api_key))
+      HTTParty.post(
+        url.to_s,
+        body: {data: payload}.to_json,
+        headers: header(api_key: options[:api_key])
+      )
     end
 
-    def self.put(resource_name:, id:, data:, api_key: nil, options: {})
+    def self.put(resource_name:, id:, data:, options: {})
       raise Apisync::UrlAndPayloadIdMismatch unless id == data[:id]
 
       url = Apisync::Http::Url.new(
@@ -25,10 +29,14 @@ class Apisync
         options: options
       )
       payload = payload_from_data(data)
-      HTTParty.put(url.to_s, body: {data: payload}.to_json, headers: header(api_key: api_key))
+      HTTParty.put(
+        url.to_s,
+        body: {data: payload}.to_json,
+        headers: header(api_key: options[:api_key])
+      )
     end
 
-    def self.get(resource_name:, api_key: nil, id: nil, filters: nil, options: {})
+    def self.get(resource_name:, id: nil, filters: nil, options: {})
       raise Apisync::InvalidFilter if !filters.nil? && !filters.is_a?(Hash)
 
       url = Apisync::Http::Url.new(
@@ -37,7 +45,7 @@ class Apisync
         filters: filters,
         options: options
       )
-      HTTParty.get(url.to_s, headers: header(api_key: api_key))
+      HTTParty.get(url.to_s, headers: header(api_key: options[:api_key]))
     end
 
     private

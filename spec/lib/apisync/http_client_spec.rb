@@ -27,7 +27,9 @@ RSpec.describe Apisync::HttpClient do
       response = subject.post(
         resource_name: 'inventory_items',
         data: data,
-        api_key: 'api_key'
+        options: {
+          api_key: 'api_key'
+        }
       )
       expect(response).to eq :http_response
     end
