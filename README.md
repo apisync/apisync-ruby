@@ -25,7 +25,7 @@ client = Apisync.new(api_key: token)
 client.inventory_items.save({
   attributes: {
     ad_template_type: "vehicle",
-    availability:     "on-sale",
+    available:        true,
     brand:            "brand",
     condition:        "new",
     content_language: "pt-br",
