@@ -1,7 +1,7 @@
 require "spec_helper"
 
 RSpec.describe Apisync::Resource do
-  subject { described_class.new(:users, host: 'host', authorization: :api_key) }
+  subject { described_class.new(:inventory_items, host: 'host', authorization: :api_key) }
 
   it "has a version number" do
     expect(Apisync::VERSION).not_to be nil
@@ -13,11 +13,12 @@ RSpec.describe Apisync::Resource do
         expect(Apisync::HttpClient)
           .to receive(:post)
           .with(
-            resource_name: :users,
+            resource_name: :inventory_items,
             data: {
               attributes: {
                 key: "value"
-              }
+              },
+              type: "inventory-items"
             },
             options: {
               host: 'host',
@@ -33,13 +34,14 @@ RSpec.describe Apisync::Resource do
         expect(Apisync::HttpClient)
           .to receive(:put)
           .with(
-            resource_name: :users,
+            resource_name: :inventory_items,
             id: 'uuid',
             data: {
               id: 'uuid',
               attributes: {
                 key: "value"
-              }
+              },
+              type: "inventory-items"
             },
             options: {
               host: 'host',
@@ -56,7 +58,7 @@ RSpec.describe Apisync::Resource do
       expect(Apisync::HttpClient)
         .to receive(:get)
         .with(
-          resource_name: :users,
+          resource_name: :inventory_items,
           id: 'uuid',
           filters: {
             key: "value"

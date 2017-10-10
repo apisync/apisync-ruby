@@ -11,6 +11,7 @@ class Apisync
     # a `POST` takes place.
     #
     def save(data)
+      data[:type] = @name.to_s.gsub("_", "-")
       if data[:id].nil?
         post(data)
       else

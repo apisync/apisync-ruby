@@ -12,7 +12,8 @@ class Apisync
         resource_name: resource_name,
         options: options
       )
-      HTTParty.post(url.to_s, body: {data: data}.to_json, headers: header(api_key: api_key))
+      payload = payload_from_data(data)
+      HTTParty.post(url.to_s, body: {data: payload}.to_json, headers: header(api_key: api_key))
     end
 
     def self.put(resource_name:, id:, data:, api_key: nil, options: {})
@@ -23,7 +24,8 @@ class Apisync
         id: id,
         options: options
       )
-      HTTParty.put(url.to_s, body: {data: data}.to_json, headers: header(api_key: api_key))
+      payload = payload_from_data(data)
+      HTTParty.put(url.to_s, body: {data: payload}.to_json, headers: header(api_key: api_key))
     end
 
     def self.get(resource_name:, api_key: nil, id: nil, filters: nil, options: {})
@@ -46,6 +48,19 @@ class Apisync
         final = final.merge("Authorization" => "ApiToken #{api_key}")
       end
       final
+    end
+
+    def self.payload_from_data(data)
+      transformed_payload = {}
+      data.each do |key, value|
+        if value.is_a?(Hash)
+          transformed_payload[key.to_s] = payload_from_data(value)
+        else
+          new_key = key.to_s.gsub("_", "-").to_sym
+          transformed_payload[new_key] = value
+        end
+      end
+      transformed_payload
     end
   end
 end

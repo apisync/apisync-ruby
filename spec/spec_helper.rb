@@ -1,4 +1,6 @@
 require "bundler/setup"
+require 'awesome_print'
+require 'pry'
 require "apisync"
 
 RSpec.configure do |config|

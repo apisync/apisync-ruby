@@ -34,14 +34,21 @@ RSpec.describe Apisync::HttpClient do
   end
 
   describe ".post" do
-    let(:data) { { attributes: { } } }
+    let(:data) { { attributes: { my_attr: "value" } } }
+    let(:payload) do
+      {
+        attributes: {
+          "my-attr": "value"
+        }
+      }
+    end
 
     it "returns whatever is returned from Httparty" do
       allow(HTTParty)
         .to receive(:post)
         .with(
           "https://api.apisync.io/inventory-items",
-          body: {data: data}.to_json,
+          body: {data: payload}.to_json,
           headers: headers
         )
         .and_return(:http_response)
@@ -55,14 +62,22 @@ RSpec.describe Apisync::HttpClient do
   end
 
   describe ".put" do
-    let(:data) { { id: 'uuid', attributes: { } } }
+    let(:data)    { { id: 'uuid', attributes: { my_attr: "value" } } }
+    let(:payload) do
+      {
+        id: 'uuid',
+        attributes: {
+          "my-attr": "value"
+        }
+      }
+    end
 
     it "returns whatever is returned from Httparty" do
       allow(HTTParty)
         .to receive(:put)
         .with(
           "https://api.apisync.io/inventory-items/uuid",
-          body: {data: data}.to_json,
+          body: {data: payload}.to_json,
           headers: headers
         )
         .and_return(:http_response)

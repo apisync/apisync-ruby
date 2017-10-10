@@ -34,4 +34,60 @@ RSpec.describe Apisync do
       end
     end
   end
+
+  describe '.api_key=' do
+    let(:global_key)   { :global_key }
+    let(:instance_key) { :instance_key }
+
+    subject { Apisync.new(api_key: instance_key) }
+
+    before { Apisync.api_key = global_key }
+
+    context 'when global key is set' do
+      context 'when instance key is set' do
+        it 'uses instance_key' do
+          expect(Apisync::Resource)
+            .to receive(:new)
+            .with(:users, { authorization: :instance_key })
+
+          subject.users
+        end
+      end
+
+      context 'when instance key is not set' do
+        let(:instance_key) { nil }
+
+        it 'uses global_key' do
+          expect(Apisync::Resource)
+            .to receive(:new)
+            .with(:users, { authorization: :global_key })
+
+          subject.users
+        end
+      end
+    end
+
+    context 'when global key is NOT set' do
+      let(:global_key) { nil }
+
+      context 'when instance key is set' do
+        it 'uses instance_key' do
+          expect(Apisync::Resource)
+            .to receive(:new)
+            .with(:users, { authorization: :instance_key })
+
+          subject.users
+        end
+      end
+
+      context 'when instance key is not set' do
+        let(:instance_key) { nil }
+
+        it 'raises ArgumentError' do
+          $debug = true
+          expect { subject }.to raise_error ArgumentError
+        end
+      end
+    end
+  end
 end
