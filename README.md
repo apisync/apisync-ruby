@@ -1,4 +1,4 @@
-# Apisync
+# apisync-ruby
 
 This gem gives you the tools to interact with [apisync.io](apisync.io).
 
@@ -12,6 +12,10 @@ gem 'apisync'
 
 ## Usage
 
+**On Rails?** Please use
+[apisync-rails](https://github.com/apisync/apisync-rails) instead. It has
+automatic integration with ActiveRecord.
+
 ### Vanilla Ruby
 
 To create an inventory item:
@@ -21,13 +25,27 @@ client = Apisync.new(api_key: token)
 client.inventory_items.save({
   attributes: {
     ad_template_type: "vehicle",
-    availability: "on-sale",
-    brand: "brand",
-    condition: "new",
-    content_language: "pt-br"
-    # ... more attributes
+    availability:     "on-sale",
+    brand:            "brand",
+    condition:        "new",
+    content_language: "pt-br",
+    reference_id:     "1"
+
+    # more attributes
   }
 })
+```
+
+For details on the attributes, see the
+[API Reference documentation](https://docs.apisync.io/api/).
+
+You can also define a global API key:
+
+```ruby
+Apisync.api_key = "my-key"
+
+# Instantiate the client now without passing a token
+client = Apisync.new
 ```
 
 ## Development
