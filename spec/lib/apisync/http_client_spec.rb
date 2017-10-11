@@ -2,14 +2,16 @@ require "spec_helper"
 
 RSpec.describe Apisync::HttpClient do
   let(:host) { "https://api.apisync.io" }
+  let(:options) { { api_key: 'api_key' } }
   let(:headers) do
     {
       "Content-Type"  => "application/vnd.api+json",
-      "Accept"        => "application/vnd.api+json"
+      "Accept"        => "application/vnd.api+json",
+      "Authorization" => 'ApiToken api_key'
     }
   end
 
-  subject { described_class }
+  subject { described_class.new(resource_name: 'inventory_items', options: options) }
 
   context 'when initialized with api_key' do
     let(:data) { { attributes: { } } }
@@ -20,17 +22,11 @@ RSpec.describe Apisync::HttpClient do
         .with(
           "https://api.apisync.io/inventory-items",
           body: {data: data}.to_json,
-          headers: headers.merge("Authorization" => 'ApiToken api_key')
+          headers: headers
         )
         .and_return(:http_response)
 
-      response = subject.post(
-        resource_name: 'inventory_items',
-        data: data,
-        options: {
-          api_key: 'api_key'
-        }
-      )
+      response = subject.post(data: data)
       expect(response).to eq :http_response
     end
   end
@@ -55,10 +51,7 @@ RSpec.describe Apisync::HttpClient do
         )
         .and_return(:http_response)
 
-      response = subject.post(
-        resource_name: 'inventory_items',
-        data: data
-      )
+      response = subject.post(data: data)
       expect(response).to eq :http_response
     end
 
@@ -73,7 +66,6 @@ RSpec.describe Apisync::HttpClient do
         .and_return(:http_response)
 
       subject.post(
-        resource_name: 'inventory_items',
         data: data,
         headers: {
           "X-HEADER" => "custom value"
@@ -103,11 +95,7 @@ RSpec.describe Apisync::HttpClient do
         )
         .and_return(:http_response)
 
-      response = subject.put(
-        resource_name: 'inventory_items',
-        id: 'uuid',
-        data: data
-      )
+      response = subject.put(id: 'uuid', data: data)
       expect(response).to eq :http_response
     end
 
@@ -122,7 +110,6 @@ RSpec.describe Apisync::HttpClient do
         .and_return(:http_response)
 
       subject.put(
-        resource_name: 'inventory_items',
         id: 'uuid',
         data: data,
         headers: {
@@ -137,7 +124,6 @@ RSpec.describe Apisync::HttpClient do
       it 'raises BadId' do
         expect do
           subject.put(
-            resource_name: 'inventory_items',
             id: 'different-uuid',
             data: data
           )
@@ -157,20 +143,19 @@ RSpec.describe Apisync::HttpClient do
     end
 
     context 'requesting by id' do
-      let(:expected_url) { "#{host}/resources/uuid" }
+      let(:expected_url) { "#{host}/inventory-items/uuid" }
 
       it "returns whatever is returned from Httparty" do
-        response = subject.get(resource_name: 'resources', id: 'uuid')
+        response = subject.get(id: 'uuid')
         expect(response).to eq :http_response
       end
     end
 
     context 'requesting by metadata' do
-      let(:expected_url) { "#{host}/resources?filter[metadata][customer-id]=abc" }
+      let(:expected_url) { "#{host}/inventory-items?filter[metadata][customer-id]=abc" }
 
       it "returns whatever is returned from Httparty" do
         response = subject.get(
-          resource_name: 'resources',
           filters: {
             metadata: {
               customer_id: "abc"
@@ -191,7 +176,6 @@ RSpec.describe Apisync::HttpClient do
         .and_return(:http_response)
 
       subject.get(
-        resource_name: 'inventory_items',
         headers: {
           "X-HEADER" => "custom value"
         }
@@ -199,10 +183,10 @@ RSpec.describe Apisync::HttpClient do
     end
 
     context 'when neither id nor filter was passed in' do
-      let(:expected_url) { "#{host}/some-resource" }
+      let(:expected_url) { "#{host}/inventory-items" }
 
       it "returns all record from resource name" do
-        subject.get(resource_name: 'some_resource')
+        subject.get
       end
     end
 
@@ -210,7 +194,7 @@ RSpec.describe Apisync::HttpClient do
       context 'when filter was passed in not as hash' do
         it 'raises InvalidFilter' do
           expect do
-            subject.get(resource_name: 'some-name', filters: 2)
+            subject.get(filters: 2)
           end.to raise_error Apisync::InvalidFilter
         end
       end

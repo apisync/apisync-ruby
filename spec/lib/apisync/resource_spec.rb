@@ -1,7 +1,17 @@
 require "spec_helper"
 
 RSpec.describe Apisync::Resource do
-  subject { described_class.new(:inventory_items, host: 'host', api_key: :api_key) }
+  let(:http_client) { instance_double(Apisync::HttpClient) }
+  let(:options) { { host: 'host', api_key: :api_key } }
+
+  subject { described_class.new(:inventory_items, options) }
+
+  before do
+    allow(Apisync::HttpClient)
+      .to receive(:new)
+      .with(resource_name: :inventory_items, options: options)
+      .and_return(http_client)
+  end
 
   it "has a version number" do
     expect(Apisync::VERSION).not_to be nil
@@ -10,31 +20,28 @@ RSpec.describe Apisync::Resource do
   describe "#save" do
     context 'when id is not present' do
       it "dispatches call to http client using post" do
-        expect(Apisync::HttpClient)
+        expect(http_client)
           .to receive(:post)
           .with(
-            resource_name: :inventory_items,
             data: {
               attributes: {
                 key: "value"
               },
               type: "inventory-items"
             },
-            options: {
-              host: 'host',
-              api_key: :api_key
+            headers: {
+              key: :value
             }
           )
-        subject.save(attributes: { key: "value" })
+        subject.save(attributes: { key: "value" }, headers: {key: :value})
       end
     end
 
     context 'when id is present' do
       it "dispatches call to http client using put" do
-        expect(Apisync::HttpClient)
+        expect(http_client)
           .to receive(:put)
           .with(
-            resource_name: :inventory_items,
             id: 'uuid',
             data: {
               id: 'uuid',
@@ -43,33 +50,35 @@ RSpec.describe Apisync::Resource do
               },
               type: "inventory-items"
             },
-            options: {
-              host: 'host',
-              api_key: :api_key
+            headers: {
+              key: :value
             }
           )
-        subject.save(id: 'uuid', attributes: { key: "value" })
+        subject.save(id: 'uuid', attributes: { key: "value" }, headers: {key: :value})
       end
     end
   end
 
   describe "#get" do
     it "dispatches call to http client" do
-      expect(Apisync::HttpClient)
+      expect(http_client)
         .to receive(:get)
         .with(
-          resource_name: :inventory_items,
           id: 'uuid',
           filters: {
             key: "value"
           },
-          options: {
-            host: 'host',
-            api_key: :api_key
+          headers: {
+            key: :value
           }
         )
 
-      subject.get(id: 'uuid', api_key: :api_key, filters: {key: "value"})
+      subject.get(
+        id: 'uuid',
+        api_key: :api_key,
+        filters: {key: "value"},
+        headers: {key: :value}
+      )
     end
   end
 end

@@ -10,12 +10,14 @@ class Apisync
     # When the resource has an id in `data`, a `PUT` request is done. Otherwise
     # a `POST` takes place.
     #
-    def save(data, headers: {})
+    def save(data)
       data[:type] = @name.to_s.gsub("_", "-")
+      headers = data.delete(:headers) || {}
+
       if data[:id].nil?
-        post(data)
+        post(data, headers: headers)
       else
-        put(data)
+        put(data, headers: headers)
       end
     end
 
@@ -30,38 +32,41 @@ class Apisync
     #   get(filters: {column_name: 'customer-id' }})
     #
     def get(conditions)
-      http_client.get(
+      client = Apisync::HttpClient.new(
         resource_name: @name,
+        options: @options
+      )
+      client.get(
         id: conditions[:id],
         filters: conditions[:filters],
-        options: @options
+        headers: conditions[:headers] || {}
       )
     end
 
     private
 
 
-    def post(data)
-      http_client.post(
+    def post(data, headers: {})
+      client = Apisync::HttpClient.new(
         resource_name: @name,
-        data: data,
         options: @options
+      )
+      client.post(
+        data: data,
+        headers: headers
       )
     end
 
-    def put(data)
-      http_client.put(
+    def put(data, headers: {})
+      client = Apisync::HttpClient.new(
         resource_name: @name,
+        options: @options
+      )
+      client.put(
         id: data[:id],
         data: data,
-        options: @options
+        headers: headers
       )
-    end
-
-    private
-
-    def http_client
-      Apisync::HttpClient
     end
   end
 end

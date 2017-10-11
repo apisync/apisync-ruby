@@ -7,58 +7,58 @@ class Apisync
       "Accept"       => "application/vnd.api+json"
     }.freeze
 
-    def self.post(resource_name:, data:, options: {}, headers: {})
-      url = Apisync::Http::Url.new(
-        resource_name: resource_name,
-        options: options
-      )
-      payload = payload_from_data(data)
+    def initialize(resource_name:, options: {})
+      @resource_name = resource_name
+      @options = options
+    end
+
+    def post(data:, headers: {})
       HTTParty.post(
-        url.to_s,
-        body: {data: payload}.to_json,
-        headers: header(api_key: options[:api_key]).merge(headers)
+        url,
+        body: {data: payload_from_data(data)}.to_json,
+        headers: header.merge(headers)
       )
     end
 
-    def self.put(resource_name:, id:, data:, options: {}, headers: {})
+    def put(id:, data:, headers: {})
       raise Apisync::UrlAndPayloadIdMismatch unless id == data[:id]
 
-      url = Apisync::Http::Url.new(
-        resource_name: resource_name,
-        id: id,
-        options: options
-      )
-      payload = payload_from_data(data)
       HTTParty.put(
-        url.to_s,
-        body: {data: payload}.to_json,
-        headers: header(api_key: options[:api_key]).merge(headers)
+        url(id: id),
+        body: {data: payload_from_data(data)}.to_json,
+        headers: header.merge(headers)
       )
     end
 
-    def self.get(resource_name:, id: nil, filters: nil, options: {}, headers: {})
+    def get(id: nil, filters: nil, headers: {})
       raise Apisync::InvalidFilter if !filters.nil? && !filters.is_a?(Hash)
 
-      url = Apisync::Http::Url.new(
-        resource_name: resource_name,
-        id: id,
-        filters: filters,
-        options: options
+      HTTParty.get(
+        url(id: id, filters: filters),
+        headers: header.merge(headers)
       )
-      HTTParty.get(url.to_s, headers: header(api_key: options[:api_key]).merge(headers))
     end
 
     private
 
-    def self.header(api_key: nil)
+    def url(id: nil, filters: nil)
+      Apisync::Http::Url.new(
+        resource_name: @resource_name,
+        id: id,
+        filters: filters,
+        options: @options
+      ).to_s
+    end
+
+    def header
       final = HEADER
-      if api_key
-        final = final.merge("Authorization" => "ApiToken #{api_key}")
+      if @options[:api_key]
+        final = final.merge("Authorization" => "ApiToken #{@options[:api_key]}")
       end
       final
     end
 
-    def self.payload_from_data(data)
+    def payload_from_data(data)
       transformed_payload = {}
       data.each do |key, value|
         if value.is_a?(Hash)
