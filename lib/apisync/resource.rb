@@ -10,7 +10,7 @@ class Apisync
     # When the resource has an id in `data`, a `PUT` request is done. Otherwise
     # a `POST` takes place.
     #
-    def save(data)
+    def save(data, headers: {})
       data[:type] = @name.to_s.gsub("_", "-")
       if data[:id].nil?
         post(data)

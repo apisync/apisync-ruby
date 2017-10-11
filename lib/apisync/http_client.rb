@@ -7,7 +7,7 @@ class Apisync
       "Accept"       => "application/vnd.api+json"
     }.freeze
 
-    def self.post(resource_name:, data:, options: {})
+    def self.post(resource_name:, data:, options: {}, headers: {})
       url = Apisync::Http::Url.new(
         resource_name: resource_name,
         options: options
@@ -16,11 +16,11 @@ class Apisync
       HTTParty.post(
         url.to_s,
         body: {data: payload}.to_json,
-        headers: header(api_key: options[:api_key])
+        headers: header(api_key: options[:api_key]).merge(headers)
       )
     end
 
-    def self.put(resource_name:, id:, data:, options: {})
+    def self.put(resource_name:, id:, data:, options: {}, headers: {})
       raise Apisync::UrlAndPayloadIdMismatch unless id == data[:id]
 
       url = Apisync::Http::Url.new(
@@ -32,11 +32,11 @@ class Apisync
       HTTParty.put(
         url.to_s,
         body: {data: payload}.to_json,
-        headers: header(api_key: options[:api_key])
+        headers: header(api_key: options[:api_key]).merge(headers)
       )
     end
 
-    def self.get(resource_name:, id: nil, filters: nil, options: {})
+    def self.get(resource_name:, id: nil, filters: nil, options: {}, headers: {})
       raise Apisync::InvalidFilter if !filters.nil? && !filters.is_a?(Hash)
 
       url = Apisync::Http::Url.new(
@@ -45,7 +45,7 @@ class Apisync
         filters: filters,
         options: options
       )
-      HTTParty.get(url.to_s, headers: header(api_key: options[:api_key]))
+      HTTParty.get(url.to_s, headers: header(api_key: options[:api_key]).merge(headers))
     end
 
     private

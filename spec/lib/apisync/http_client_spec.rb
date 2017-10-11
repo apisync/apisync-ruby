@@ -46,7 +46,7 @@ RSpec.describe Apisync::HttpClient do
     end
 
     it "returns whatever is returned from Httparty" do
-      allow(HTTParty)
+      expect(HTTParty)
         .to receive(:post)
         .with(
           "https://api.apisync.io/inventory-items",
@@ -60,6 +60,25 @@ RSpec.describe Apisync::HttpClient do
         data: data
       )
       expect(response).to eq :http_response
+    end
+
+    it 'supports custom headers' do
+      expect(HTTParty)
+        .to receive(:post)
+        .with(
+          "https://api.apisync.io/inventory-items",
+          body: {data: payload}.to_json,
+          headers: headers.merge("X-HEADER" => "custom value")
+        )
+        .and_return(:http_response)
+
+      subject.post(
+        resource_name: 'inventory_items',
+        data: data,
+        headers: {
+          "X-HEADER" => "custom value"
+        }
+      )
     end
   end
 
@@ -92,6 +111,26 @@ RSpec.describe Apisync::HttpClient do
       expect(response).to eq :http_response
     end
 
+    it 'supports custom headers' do
+      expect(HTTParty)
+        .to receive(:put)
+        .with(
+          "https://api.apisync.io/inventory-items/uuid",
+          body: {data: payload}.to_json,
+          headers: headers.merge("X-HEADER" => "custom value")
+        )
+        .and_return(:http_response)
+
+      subject.put(
+        resource_name: 'inventory_items',
+        id: 'uuid',
+        data: data,
+        headers: {
+          "X-HEADER" => "custom value"
+        }
+      )
+    end
+
     context 'when passed in id is not the same as the payload id' do
       let(:data) { { id: 'uuid' } }
 
@@ -117,7 +156,7 @@ RSpec.describe Apisync::HttpClient do
         .and_return(:http_response)
     end
 
-    context 'looking by id' do
+    context 'requesting by id' do
       let(:expected_url) { "#{host}/resources/uuid" }
 
       it "returns whatever is returned from Httparty" do
@@ -126,7 +165,7 @@ RSpec.describe Apisync::HttpClient do
       end
     end
 
-    context 'looking by metadata' do
+    context 'requesting by metadata' do
       let(:expected_url) { "#{host}/resources?filter[metadata][customer-id]=abc" }
 
       it "returns whatever is returned from Httparty" do
@@ -140,6 +179,23 @@ RSpec.describe Apisync::HttpClient do
         )
         expect(response).to eq :http_response
       end
+    end
+
+    it 'supports custom headers' do
+      expect(HTTParty)
+        .to receive(:get)
+        .with(
+          "https://api.apisync.io/inventory-items",
+          headers: headers.merge("X-HEADER" => "custom value")
+        )
+        .and_return(:http_response)
+
+      subject.get(
+        resource_name: 'inventory_items',
+        headers: {
+          "X-HEADER" => "custom value"
+        }
+      )
     end
 
     context 'when neither id nor filter was passed in' do
