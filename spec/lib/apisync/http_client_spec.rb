@@ -17,17 +17,14 @@ RSpec.describe Apisync::HttpClient do
     let(:data) { { attributes: { } } }
 
     it "returns whatever is returned from Httparty" do
-      allow(HTTParty)
-        .to receive(:post)
+      stub_request(:post, "https://api.apisync.io/inventory-items")
         .with(
-          "https://api.apisync.io/inventory-items",
           body: {data: data}.to_json,
           headers: headers
         )
-        .and_return(:http_response)
 
       response = subject.post(data: data)
-      expect(response).to eq :http_response
+      expect(response).to be_instance_of(HTTParty::Response)
     end
   end
 
@@ -42,28 +39,22 @@ RSpec.describe Apisync::HttpClient do
     end
 
     it "returns whatever is returned from Httparty" do
-      expect(HTTParty)
-        .to receive(:post)
+      stub_request(:post, "https://api.apisync.io/inventory-items")
         .with(
-          "https://api.apisync.io/inventory-items",
           body: {data: payload}.to_json,
           headers: headers
         )
-        .and_return(:http_response)
 
       response = subject.post(data: data)
-      expect(response).to eq :http_response
+      expect(response).to be_instance_of(HTTParty::Response)
     end
 
     it 'supports custom headers' do
-      expect(HTTParty)
-        .to receive(:post)
+      stub_request(:post, "https://api.apisync.io/inventory-items")
         .with(
-          "https://api.apisync.io/inventory-items",
           body: {data: payload}.to_json,
           headers: headers.merge("X-HEADER" => "custom value")
         )
-        .and_return(:http_response)
 
       subject.post(
         data: data,
@@ -71,6 +62,19 @@ RSpec.describe Apisync::HttpClient do
           "X-HEADER" => "custom value"
         }
       )
+    end
+
+    context 'when 429 is returned' do
+      before do
+        stub_request(:post, "https://api.apisync.io/inventory-items")
+          .to_return(status: 429)
+      end
+
+      it 'raises TooManyRequests' do
+        expect {
+          subject.post(data: { id: :uuid })
+        }.to raise_error Apisync::TooManyRequests
+      end
     end
   end
 
@@ -86,28 +90,22 @@ RSpec.describe Apisync::HttpClient do
     end
 
     it "returns whatever is returned from Httparty" do
-      allow(HTTParty)
-        .to receive(:put)
+      stub_request(:put, "https://api.apisync.io/inventory-items/uuid")
         .with(
-          "https://api.apisync.io/inventory-items/uuid",
           body: {data: payload}.to_json,
           headers: headers
         )
-        .and_return(:http_response)
 
       response = subject.put(id: 'uuid', data: data)
-      expect(response).to eq :http_response
+      expect(response).to be_instance_of(HTTParty::Response)
     end
 
     it 'supports custom headers' do
-      expect(HTTParty)
-        .to receive(:put)
+      stub_request(:put, "https://api.apisync.io/inventory-items/uuid")
         .with(
-          "https://api.apisync.io/inventory-items/uuid",
           body: {data: payload}.to_json,
           headers: headers.merge("X-HEADER" => "custom value")
         )
-        .and_return(:http_response)
 
       subject.put(
         id: 'uuid',
@@ -130,16 +128,27 @@ RSpec.describe Apisync::HttpClient do
         end.to raise_error Apisync::UrlAndPayloadIdMismatch
       end
     end
+
+    context 'when 429 is returned' do
+      before do
+        stub_request(:put, "https://api.apisync.io/inventory-items/uuid")
+          .to_return(status: 429)
+      end
+
+      it 'raises TooManyRequests' do
+        expect {
+          subject.put(id: :uuid, data: { id: :uuid })
+        }.to raise_error Apisync::TooManyRequests
+      end
+    end
   end
 
   describe ".get" do
-    let(:expected_url) { "" }
+    let(:expected_url) { "#{host}/inventory-items" }
 
     before do
-      allow(HTTParty)
-        .to receive(:get)
-        .with(expected_url, headers: headers)
-        .and_return(:http_response)
+      stub_request(:get, expected_url)
+        .with(headers: headers)
     end
 
     context 'requesting by id' do
@@ -147,7 +156,7 @@ RSpec.describe Apisync::HttpClient do
 
       it "returns whatever is returned from Httparty" do
         response = subject.get(id: 'uuid')
-        expect(response).to eq :http_response
+        expect(response).to be_instance_of(HTTParty::Response)
       end
     end
 
@@ -162,24 +171,24 @@ RSpec.describe Apisync::HttpClient do
             }
           }
         )
-        expect(response).to eq :http_response
+        expect(response).to be_instance_of(HTTParty::Response)
       end
     end
 
-    it 'supports custom headers' do
-      expect(HTTParty)
-        .to receive(:get)
-        .with(
-          "https://api.apisync.io/inventory-items",
-          headers: headers.merge("X-HEADER" => "custom value")
-        )
-        .and_return(:http_response)
-
-      subject.get(
-        headers: {
+    context 'when using custom headers' do
+      let(:headers) do
+        {
           "X-HEADER" => "custom value"
         }
-      )
+      end
+
+      it 'adds the headers' do
+        subject.get(
+          headers: {
+            "X-HEADER" => "custom value"
+          }
+        )
+      end
     end
 
     context 'when neither id nor filter was passed in' do
@@ -191,6 +200,19 @@ RSpec.describe Apisync::HttpClient do
     end
 
     describe 'exceptions' do
+      context 'when 429 is returned' do
+        before do
+          stub_request(:get, "https://api.apisync.io/inventory-items")
+            .to_return(status: 429)
+        end
+
+        it 'raises TooManyRequests' do
+          expect {
+            subject.get
+          }.to raise_error Apisync::TooManyRequests
+        end
+      end
+
       context 'when filter was passed in not as hash' do
         it 'raises InvalidFilter' do
           expect do

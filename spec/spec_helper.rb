@@ -1,7 +1,10 @@
 require "bundler/setup"
 require 'awesome_print'
 require 'pry'
+require 'webmock/rspec'
 require "apisync"
+
+WebMock.disable_net_connect!
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

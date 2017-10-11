@@ -13,30 +13,30 @@ class Apisync
     end
 
     def post(data:, headers: {})
-      HTTParty.post(
+      wrap_response(HTTParty.post(
         url,
         body: {data: payload_from_data(data)}.to_json,
         headers: header.merge(headers)
-      )
+      ))
     end
 
     def put(id:, data:, headers: {})
       raise Apisync::UrlAndPayloadIdMismatch unless id == data[:id]
 
-      HTTParty.put(
+      wrap_response(HTTParty.put(
         url(id: id),
         body: {data: payload_from_data(data)}.to_json,
         headers: header.merge(headers)
-      )
+      ))
     end
 
     def get(id: nil, filters: nil, headers: {})
       raise Apisync::InvalidFilter if !filters.nil? && !filters.is_a?(Hash)
 
-      HTTParty.get(
+      wrap_response(HTTParty.get(
         url(id: id, filters: filters),
         headers: header.merge(headers)
-      )
+      ))
     end
 
     private
@@ -69,6 +69,14 @@ class Apisync
         end
       end
       transformed_payload
+    end
+
+    def wrap_response(response)
+      if response.code.to_i == 429
+        raise Apisync::TooManyRequests
+      else
+        response
+      end
     end
   end
 end
