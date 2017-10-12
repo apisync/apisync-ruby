@@ -48,6 +48,19 @@ Apisync.api_key = "my-key"
 client = Apisync.new
 ```
 
+### Responses
+
+All HTTP calls return an
+[HTTPart::Response](https://github.com/jnunemaker/httparty) instance:
+
+```ruby
+response = client.inventory_items.save(attributes)
+response.success? # => true
+```
+
+In case too many requests are made simultaneously, the server will return
+429 and this lib will raise the `Apisync::TooManyRequests` exception.
+
 ## Development
 
 To run tests:
