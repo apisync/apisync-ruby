@@ -28,7 +28,7 @@ class Apisync
   end
 
   def self.host=(value)
-    @@host = host
+    @@host = value
   end
 
   def self.api_key=(value)
