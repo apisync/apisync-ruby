@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "httparty"
+require "securerandom"
 
 require "apisync/version"
 require "apisync/exceptions"

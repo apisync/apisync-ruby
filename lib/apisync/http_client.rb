@@ -52,6 +52,7 @@ class Apisync
 
     def header
       final = HEADER
+      final = final.merge("X-Request-Id" => ::SecureRandom.uuid)
       if @options[:api_key]
         final = final.merge("Authorization" => "ApiToken #{@options[:api_key]}")
       end

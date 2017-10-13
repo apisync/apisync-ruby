@@ -49,6 +49,12 @@ RSpec.describe Apisync::HttpClient do
       expect(response).to be_instance_of(HTTParty::Response)
     end
 
+    it 'adds default headers' do
+      stub_request(:post, "https://api.apisync.io/inventory-items")
+        .with(headers: headers.merge("X-Request-Id" => /.{8}-.*/))
+      subject.post(data: data)
+    end
+
     it 'supports custom headers' do
       stub_request(:post, "https://api.apisync.io/inventory-items")
         .with(
