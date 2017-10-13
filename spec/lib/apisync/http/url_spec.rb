@@ -4,7 +4,7 @@ RSpec.describe Apisync::Http::Url do
   let(:resource_name) { 'resource' }
   let(:id)            { nil }
   let(:filters)       { {} }
-  let(:options)       { {} }
+  let(:options)       { {host: nil} }
 
   subject do
     described_class.new(

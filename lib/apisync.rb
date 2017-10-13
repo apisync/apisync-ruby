@@ -10,20 +10,28 @@ require "apisync/http/query_string"
 
 class Apisync
   @@api_key = nil
+  @@host = nil
 
   def initialize(api_key: nil)
     @api_key = api_key || @@api_key
+    @host = @@host
 
     raise ArgumentError, "missing keyword: api_key" if @api_key.nil?
   end
 
   def method_missing(name, args = {}, &block)
     # overrides the instance api_key as `authorization`
-    options = args.merge(api_key: @api_key)
+    options = {
+      host: @host
+    }.merge(args).merge(api_key: @api_key)
     Apisync::Resource.new(name, options)
   end
 
-  def self.api_key=(key)
-    @@api_key = key
+  def self.host=(value)
+    @@host = host
+  end
+
+  def self.api_key=(value)
+    @@api_key = value
   end
 end
