@@ -18,7 +18,7 @@ class Apisync
       url = request_url
       header = request_header.merge(headers)
 
-      output_verbose_request(url, request_body, header)
+      output_verbose_request(:post, url, request_body, header)
 
       wrap_response(HTTParty.post(
         request_url,
@@ -34,7 +34,7 @@ class Apisync
       url = request_url(id: id)
       header = request_header.merge(headers)
 
-      output_verbose_request(url, request_body, header)
+      output_verbose_request(:put, url, request_body, header)
 
       wrap_response(HTTParty.put(
         url,
@@ -47,7 +47,7 @@ class Apisync
       raise Apisync::InvalidFilter if !filters.nil? && !filters.is_a?(Hash)
 
       url = request_url(id: id, filters: filters)
-      output_verbose_request(url)
+      output_verbose_request(:get, url)
 
       wrap_response(HTTParty.get(
         url,
@@ -61,9 +61,10 @@ class Apisync
       @options.fetch(:verbose, false)
     end
 
-    def output_verbose_request(url, body = nil, headers = nil)
-      log("[APISync] Request URL: #{url}")
-      log("[APISync] Payload: #{body.to_json}")if body
+    def output_verbose_request(verb, url, body = nil, headers = nil)
+      msg = "[APISync] Request: #{verb.to_s.upcase} #{url}"
+      msg << " #{body.to_json}" if body
+      log(msg)
     end
 
     def request_url(id: nil, filters: nil)
@@ -106,9 +107,7 @@ class Apisync
       else
         if verbose?
           msg = "[APISync] Response: #{response.code}"
-          if response.body != ""
-            msg << " #{response.body}"
-          end
+          msg << " #{response.body}" if response.body != ""
           log msg
         end
         response

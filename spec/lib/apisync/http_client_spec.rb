@@ -66,8 +66,7 @@ RSpec.describe Apisync::HttpClient do
         expect(response).to be_instance_of(HTTParty::Response)
       end.to output(
         <<-STR.gsub(/^\s*/, '')
-          [APISync] Request URL: https://api.apisync.io/inventory-items
-          [APISync] Payload: {"data":{"attributes":{"my-attr":"value"}}}
+          [APISync] Request: POST https://api.apisync.io/inventory-items {"data":{"attributes":{"my-attr":"value"}}}
           [APISync] Response: 200 {"data": "empty"}
         STR
       ).to_stdout
@@ -108,8 +107,7 @@ RSpec.describe Apisync::HttpClient do
             end
           end.to output(
             <<-STR.gsub(/^\s*/, '')
-              [APISync] Request URL: https://api.apisync.io/inventory-items
-              [APISync] Payload: {"data":{"id":"uuid"}}
+              [APISync] Request: POST https://api.apisync.io/inventory-items {"data":{"id":"uuid"}}
               [APISync] Response: 429 Too many requests at once, slow down.
             STR
           ).to_stdout
@@ -124,7 +122,7 @@ RSpec.describe Apisync::HttpClient do
   end
 
   describe ".put" do
-    let(:data)    { { id: 'uuid', attributes: { my_attr: "value" } } }
+    let(:data) { { id: 'uuid', attributes: { my_attr: "value" } } }
     let(:payload) do
       {
         id: 'uuid',
@@ -146,8 +144,7 @@ RSpec.describe Apisync::HttpClient do
         expect(response).to be_instance_of(HTTParty::Response)
       end.to output(
         <<-STR.gsub(/^\s*/, '')
-          [APISync] Request URL: https://api.apisync.io/inventory-items/uuid
-          [APISync] Payload: {"data":{"id":"uuid","attributes":{"my-attr":"value"}}}
+          [APISync] Request: PUT https://api.apisync.io/inventory-items/uuid {"data":{"id":"uuid","attributes":{"my-attr":"value"}}}
           [APISync] Response: 200
         STR
       ).to_stdout
@@ -214,7 +211,7 @@ RSpec.describe Apisync::HttpClient do
           expect(response).to be_instance_of(HTTParty::Response)
         end.to output(
           <<-STR.gsub(/^\s*/, '')
-            [APISync] Request URL: https://api.apisync.io/inventory-items/uuid
+            [APISync] Request: GET https://api.apisync.io/inventory-items/uuid
             [APISync] Response: 200 {"data": "empty"}
           STR
         ).to_stdout
