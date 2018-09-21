@@ -16,7 +16,7 @@ RSpec.describe Apisync do
       it "uses an abstract resource" do
         expect(Apisync::Resource)
           .to receive(:new)
-          .with(:users, {host: nil, api_key: :api_key})
+          .with(:users, {host: nil, verbose: true, api_key: :api_key})
           .and_return(resource)
 
         expect(subject.users).to eq resource
@@ -27,7 +27,7 @@ RSpec.describe Apisync do
       it 'passes it along to the resource' do
         expect(Apisync::Resource)
           .to receive(:new)
-          .with(:users, { host: 'http://users', api_key: api_key })
+          .with(:users, { host: 'http://users', verbose: true, api_key: api_key })
           .and_return(resource)
 
         subject.users(host: 'http://users', api_key: '123')
@@ -48,7 +48,7 @@ RSpec.describe Apisync do
         it 'uses instance_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { host: nil, api_key: :instance_key })
+            .with(:users, { host: nil, verbose: true, api_key: :instance_key })
 
           subject.users
         end
@@ -60,7 +60,7 @@ RSpec.describe Apisync do
         it 'uses global_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { host: nil, api_key: :global_key })
+            .with(:users, { host: nil, verbose: true, api_key: :global_key })
 
           subject.users
         end
@@ -74,7 +74,7 @@ RSpec.describe Apisync do
         it 'uses instance_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { host: nil, api_key: :instance_key })
+            .with(:users, { host: nil, verbose: true, api_key: :instance_key })
 
           subject.users
         end
@@ -86,6 +86,35 @@ RSpec.describe Apisync do
         it 'raises ArgumentError' do
           $debug = true
           expect { subject }.to raise_error ArgumentError
+        end
+      end
+    end
+  end
+
+  describe '.verbose' do
+
+    context 'when global verbosity is set' do
+      before do
+        Apisync.verbose = true
+      end
+
+      it 'uses global verbosity' do
+        expect(Apisync).to be_verbose
+      end
+    end
+
+    context 'when global verbosity is false' do
+      before do
+        Apisync.verbose = false
+      end
+
+      it 'uses global verbosity' do
+        expect(Apisync).not_to be_verbose
+      end
+
+      context 'instance overrides verbosity' do
+        it 'overrides global verbosity' do
+          expect(Apisync.new(api_key: 1, verbose: true).verbose).to eq true
         end
       end
     end

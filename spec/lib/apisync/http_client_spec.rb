@@ -2,7 +2,8 @@ require "spec_helper"
 
 RSpec.describe Apisync::HttpClient do
   let(:host) { "https://api.apisync.io" }
-  let(:options) { { api_key: 'api_key' } }
+  let(:verbose) { true }
+  let(:options) { { api_key: 'api_key', verbose: verbose } }
   let(:headers) do
     {
       "Content-Type"  => "application/vnd.api+json",
@@ -11,7 +12,21 @@ RSpec.describe Apisync::HttpClient do
     }
   end
 
-  subject { described_class.new(resource_name: 'inventory_items', options: options) }
+  subject do
+    described_class.new(
+      resource_name: 'inventory_items',
+      options: options
+    )
+  end
+
+  before do
+    $original_stdout = $stdout
+    $stdout = File.open(File::NULL, "w")
+  end
+
+  after do
+    $stdout = $original_stdout
+  end
 
   context 'when initialized with api_key' do
     let(:data) { { attributes: { } } }
@@ -44,9 +59,18 @@ RSpec.describe Apisync::HttpClient do
           body: {data: payload}.to_json,
           headers: headers
         )
+        .to_return(body: '{"data": "empty"}')
 
-      response = subject.post(data: data)
-      expect(response).to be_instance_of(HTTParty::Response)
+      expect do
+        response = subject.post(data: data)
+        expect(response).to be_instance_of(HTTParty::Response)
+      end.to output(
+        <<-STR.gsub(/^\s*/, '')
+          [APISync] Request URL: https://api.apisync.io/inventory-items
+          [APISync] Payload: {"data":{"attributes":{"my-attr":"value"}}}
+          [APISync] Response: 200 {"data": "empty"}
+        STR
+      ).to_stdout
     end
 
     it 'adds default headers' do
@@ -76,6 +100,21 @@ RSpec.describe Apisync::HttpClient do
           .to_return(status: 429)
       end
 
+      it 'outputs the request' do
+          expect do
+            begin
+              subject.post(data: { id: :uuid })
+            rescue Apisync::TooManyRequests
+            end
+          end.to output(
+            <<-STR.gsub(/^\s*/, '')
+              [APISync] Request URL: https://api.apisync.io/inventory-items
+              [APISync] Payload: {"data":{"id":"uuid"}}
+              [APISync] Response: 429 Too many requests at once, slow down.
+            STR
+          ).to_stdout
+      end
+
       it 'raises TooManyRequests' do
         expect {
           subject.post(data: { id: :uuid })
@@ -102,8 +141,16 @@ RSpec.describe Apisync::HttpClient do
           headers: headers
         )
 
-      response = subject.put(id: 'uuid', data: data)
-      expect(response).to be_instance_of(HTTParty::Response)
+      expect do
+        response = subject.put(id: 'uuid', data: data)
+        expect(response).to be_instance_of(HTTParty::Response)
+      end.to output(
+        <<-STR.gsub(/^\s*/, '')
+          [APISync] Request URL: https://api.apisync.io/inventory-items/uuid
+          [APISync] Payload: {"data":{"id":"uuid","attributes":{"my-attr":"value"}}}
+          [APISync] Response: 200
+        STR
+      ).to_stdout
     end
 
     it 'supports custom headers' do
@@ -155,14 +202,22 @@ RSpec.describe Apisync::HttpClient do
     before do
       stub_request(:get, expected_url)
         .with(headers: headers)
+        .to_return(body: '{"data": "empty"}')
     end
 
     context 'requesting by id' do
       let(:expected_url) { "#{host}/inventory-items/uuid" }
 
       it "returns whatever is returned from Httparty" do
-        response = subject.get(id: 'uuid')
-        expect(response).to be_instance_of(HTTParty::Response)
+        expect do
+          response = subject.get(id: 'uuid')
+          expect(response).to be_instance_of(HTTParty::Response)
+        end.to output(
+          <<-STR.gsub(/^\s*/, '')
+            [APISync] Request URL: https://api.apisync.io/inventory-items/uuid
+            [APISync] Response: 200 {"data": "empty"}
+          STR
+        ).to_stdout
       end
     end
 

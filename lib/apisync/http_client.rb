@@ -10,38 +10,63 @@ class Apisync
     def initialize(resource_name:, options: {})
       @resource_name = resource_name
       @options = options
+      @logger = options[:logger]
     end
 
     def post(data:, headers: {})
+      request_body = {data: payload_from_data(data)}
+      url = request_url
+      header = request_header.merge(headers)
+
+      output_verbose_request(url, request_body, header)
+
       wrap_response(HTTParty.post(
-        url,
-        body: {data: payload_from_data(data)}.to_json,
-        headers: header.merge(headers)
+        request_url,
+        body: request_body.to_json,
+        headers: header
       ))
     end
 
     def put(id:, data:, headers: {})
       raise Apisync::UrlAndPayloadIdMismatch unless id == data[:id]
 
+      request_body = {data: payload_from_data(data)}
+      url = request_url(id: id)
+      header = request_header.merge(headers)
+
+      output_verbose_request(url, request_body, header)
+
       wrap_response(HTTParty.put(
-        url(id: id),
-        body: {data: payload_from_data(data)}.to_json,
-        headers: header.merge(headers)
+        url,
+        body: request_body.to_json,
+        headers: header
       ))
     end
 
     def get(id: nil, filters: nil, headers: {})
       raise Apisync::InvalidFilter if !filters.nil? && !filters.is_a?(Hash)
 
+      url = request_url(id: id, filters: filters)
+      output_verbose_request(url)
+
       wrap_response(HTTParty.get(
-        url(id: id, filters: filters),
-        headers: header.merge(headers)
+        url,
+        headers: request_header.merge(headers)
       ))
     end
 
     private
 
-    def url(id: nil, filters: nil)
+    def verbose?
+      @options.fetch(:verbose, false)
+    end
+
+    def output_verbose_request(url, body = nil, headers = nil)
+      log("[APISync] Request URL: #{url}")
+      log("[APISync] Payload: #{body.to_json}")if body
+    end
+
+    def request_url(id: nil, filters: nil)
       Apisync::Http::Url.new(
         resource_name: @resource_name,
         id: id,
@@ -50,7 +75,7 @@ class Apisync
       ).to_s
     end
 
-    def header
+    def request_header
       final = HEADER
       final = final.merge("X-Request-Id" => ::SecureRandom.uuid)
       if @options[:api_key]
@@ -74,10 +99,25 @@ class Apisync
 
     def wrap_response(response)
       if response.code.to_i == 429
+        if verbose?
+          log "[APISync] Response: 429 Too many requests at once, slow down."
+        end
         raise Apisync::TooManyRequests
       else
+        if verbose?
+          msg = "[APISync] Response: #{response.code}"
+          if response.body != ""
+            msg << " #{response.body}"
+          end
+          log msg
+        end
         response
       end
+    end
+
+    def log(msg)
+      $stdout.puts(msg) if verbose?
+      @logger.info(msg)
     end
   end
 end

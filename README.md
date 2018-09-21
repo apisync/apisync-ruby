@@ -39,13 +39,39 @@ client.inventory_items.save({
 For details on the attributes, see the
 [API Reference documentation](https://docs.apisync.io/api/).
 
-You can also define a global API key:
+You can also define the API key globally:
 
 ```ruby
 Apisync.api_key = "my-key"
 
 # Instantiate the client now without passing a token
 client = Apisync.new
+```
+
+#### Verbose
+
+If you want to output to `$stdout`, set `verbose: true`:
+
+```rb
+# Define in the instance
+client = Apisync.new(api_key: 'api-key', verbose: true)
+
+# or define it globally
+Apisync.verbose = true
+```
+
+That is useful on Rails console in development mode, so you know what requests
+are being made
+
+**Logger**
+
+You can inject a logger as well:
+
+```rb
+Apisync.logger = Logger.new($stdout)
+
+# or
+Apisync.logger = Rails.logger
 ```
 
 ### Responses
