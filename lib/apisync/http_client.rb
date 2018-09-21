@@ -10,7 +10,7 @@ class Apisync
     def initialize(resource_name:, options: {})
       @resource_name = resource_name
       @options = options
-      @logger = options[:logger]
+      @logger = options[:logger] || ::Logger.new(IO::NULL)
     end
 
     def post(data:, headers: {})

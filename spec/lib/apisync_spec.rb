@@ -5,6 +5,11 @@ RSpec.describe Apisync do
 
   subject { described_class.new(api_key: api_key) }
 
+  before do
+    Apisync.verbose = nil
+    Apisync.logger = nil
+  end
+
   it "has a version number" do
     expect(Apisync::VERSION).not_to be nil
   end
@@ -16,7 +21,7 @@ RSpec.describe Apisync do
       it "uses an abstract resource" do
         expect(Apisync::Resource)
           .to receive(:new)
-          .with(:users, {host: nil, verbose: true, api_key: :api_key})
+          .with(:users, {host: nil, verbose: nil, logger: nil, api_key: :api_key})
           .and_return(resource)
 
         expect(subject.users).to eq resource
@@ -27,7 +32,7 @@ RSpec.describe Apisync do
       it 'passes it along to the resource' do
         expect(Apisync::Resource)
           .to receive(:new)
-          .with(:users, { host: 'http://users', verbose: true, api_key: api_key })
+          .with(:users, { host: 'http://users', verbose: nil, logger: nil, api_key: api_key })
           .and_return(resource)
 
         subject.users(host: 'http://users', api_key: '123')
@@ -48,7 +53,7 @@ RSpec.describe Apisync do
         it 'uses instance_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { host: nil, verbose: true, api_key: :instance_key })
+            .with(:users, { host: nil, verbose: nil, logger: nil, api_key: :instance_key })
 
           subject.users
         end
@@ -60,7 +65,7 @@ RSpec.describe Apisync do
         it 'uses global_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { host: nil, verbose: true, api_key: :global_key })
+            .with(:users, { host: nil, verbose: nil, logger: nil, api_key: :global_key })
 
           subject.users
         end
@@ -74,7 +79,7 @@ RSpec.describe Apisync do
         it 'uses instance_key' do
           expect(Apisync::Resource)
             .to receive(:new)
-            .with(:users, { host: nil, verbose: true, api_key: :instance_key })
+            .with(:users, { host: nil, verbose: nil, logger: nil, api_key: :instance_key })
 
           subject.users
         end
@@ -91,7 +96,16 @@ RSpec.describe Apisync do
     end
   end
 
+  describe '.logger' do
+    it 'returns nil' do
+      expect(Apisync.logger).to eq nil
+    end
+  end
+
   describe '.verbose' do
+    it 'returns nil' do
+      expect(Apisync.verbose).to eq nil
+    end
 
     context 'when global verbosity is set' do
       before do
@@ -99,7 +113,7 @@ RSpec.describe Apisync do
       end
 
       it 'uses global verbosity' do
-        expect(Apisync).to be_verbose
+        expect(Apisync.verbose).to eq true
       end
     end
 
@@ -109,7 +123,7 @@ RSpec.describe Apisync do
       end
 
       it 'uses global verbosity' do
-        expect(Apisync).not_to be_verbose
+        expect(Apisync.verbose).to eq false
       end
 
       context 'instance overrides verbosity' do

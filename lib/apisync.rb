@@ -16,7 +16,7 @@ class Apisync
 
   # Verbose will do $stdout.puts. That's useful on a Rails console in
   # development, where logger output is ommited.
-  @@verbose = false
+  @@verbose = nil
   @@logger = nil
 
   attr_accessor :verbose
@@ -26,7 +26,7 @@ class Apisync
     @host = @@host
     @verbose = verbose || @@verbose
 
-    @logger = logger || @@logger || ::Logger.new(IO::NULL)
+    @logger = logger || @@logger
 
     raise ArgumentError, "missing keyword: api_key" if @api_key.nil?
   end
@@ -58,7 +58,11 @@ class Apisync
     @@logger = value
   end
 
-  def self.verbose?
-    !!@@verbose
+  def self.logger
+    @@logger
+  end
+
+  def self.verbose
+    @@verbose
   end
 end
