@@ -48,7 +48,7 @@ RSpec.describe Apisync::HttpClient do
     let(:payload) do
       {
         attributes: {
-          "my-attr": "value"
+          my_attr: "value"
         }
       }
     end
@@ -66,7 +66,7 @@ RSpec.describe Apisync::HttpClient do
         expect(response).to be_instance_of(HTTParty::Response)
       end.to output(
         <<-STR.gsub(/^\s*/, '')
-          [APISync] Request: POST https://api.apisync.io/inventory-items {"data":{"attributes":{"my-attr":"value"}}}
+          [APISync] Request: POST https://api.apisync.io/inventory-items {"data":{"attributes":{"my_attr":"value"}}}
           [APISync] Response: 200 {"data": "empty"}
         STR
       ).to_stdout
@@ -127,7 +127,7 @@ RSpec.describe Apisync::HttpClient do
       {
         id: 'uuid',
         attributes: {
-          "my-attr": "value"
+          my_attr: "value"
         }
       }
     end
@@ -144,7 +144,7 @@ RSpec.describe Apisync::HttpClient do
         expect(response).to be_instance_of(HTTParty::Response)
       end.to output(
         <<-STR.gsub(/^\s*/, '')
-          [APISync] Request: PUT https://api.apisync.io/inventory-items/uuid {"data":{"id":"uuid","attributes":{"my-attr":"value"}}}
+          [APISync] Request: PUT https://api.apisync.io/inventory-items/uuid {"data":{"id":"uuid","attributes":{"my_attr":"value"}}}
           [APISync] Response: 200
         STR
       ).to_stdout
@@ -219,7 +219,7 @@ RSpec.describe Apisync::HttpClient do
     end
 
     context 'requesting by metadata' do
-      let(:expected_url) { "#{host}/inventory-items?filter[metadata][customer-id]=abc" }
+      let(:expected_url) { "#{host}/inventory-items?filter[metadata][customer_id]=abc" }
 
       it "returns whatever is returned from Httparty" do
         response = subject.get(

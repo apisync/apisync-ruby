@@ -68,7 +68,7 @@ RSpec.describe Apisync::Http::Url do
       end
 
       it "returns the final url" do
-        expect(subject.to_s).to eq 'https://api.apisync.io/resource?filter[metadata][customer-id]=abc'
+        expect(subject.to_s).to eq 'https://api.apisync.io/resource?filter[metadata][customer_id]=abc'
       end
     end
   end

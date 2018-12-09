@@ -46,6 +46,7 @@ RSpec.describe Apisync::Resource do
             data: {
               id: 'uuid',
               attributes: {
+                underscore_key: 'value',
                 key: "value"
               },
               type: "inventory-items"
@@ -54,7 +55,16 @@ RSpec.describe Apisync::Resource do
               key: :value
             }
           )
-        subject.save(id: 'uuid', attributes: { key: "value" }, headers: {key: :value})
+        subject.save(
+          id: 'uuid',
+          attributes: {
+            underscore_key: 'value',
+            key: "value"
+          },
+          headers: {
+            key: :value
+          }
+        )
       end
     end
   end

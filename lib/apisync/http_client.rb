@@ -91,8 +91,7 @@ class Apisync
         if value.is_a?(Hash)
           transformed_payload[key.to_s] = payload_from_data(value)
         else
-          new_key = key.to_s.gsub("_", "-").to_sym
-          transformed_payload[new_key] = value
+          transformed_payload[key] = value
         end
       end
       transformed_payload

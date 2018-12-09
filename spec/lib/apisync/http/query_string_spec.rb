@@ -25,7 +25,7 @@ RSpec.describe Apisync::Http::QueryString do
 
         it "returns filter" do
           expect(subject.to_s).to eq(
-            "filter[metadata][customer-id]=abc&filter[metadata][second-key]=xyz"
+            "filter[metadata][customer_id]=abc&filter[metadata][second_key]=xyz"
           )
         end
       end
@@ -65,7 +65,7 @@ RSpec.describe Apisync::Http::QueryString do
 
         it "returns filter" do
           expect(subject.to_s).to eq(
-            "filter[application-id]=app_id&filter[metadata][customer-id]=abc&filter[metadata][second-key]=xyz"
+            "filter[application_id]=app_id&filter[metadata][customer_id]=abc&filter[metadata][second_key]=xyz"
           )
         end
       end

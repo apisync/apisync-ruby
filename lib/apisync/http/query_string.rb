@@ -46,7 +46,7 @@ class Apisync
       def recursive_brackets(hash, prefix = "")
         result = []
         hash.each do |key, value|
-          key = hyphenize(key.to_s)
+          key = key.to_s
           if value.is_a?(Hash)
             prefix = "#{prefix}[#{key}]"
             top_nodes = recursive_brackets(value, prefix)
@@ -57,11 +57,6 @@ class Apisync
         end
 
         result
-      end
-
-      # Converts application_id in application-id.
-      def hyphenize(string)
-        string.gsub(/_/, "-")
       end
     end
   end
